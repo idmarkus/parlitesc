@@ -1,0 +1,27 @@
+# Project exclude paths
+*.so
+*.so.*
+*.dll
+*.exe
+*.o
+*.obj
+*.res
+*.lib
+*.a
+*.la
+*.dSYM
+*,e1f
+*,ff8
+*.lnk
+*.err
+*.exp
+*.map
+*.orig
+*~
+*.swp
+*.tmp
+*.rej
+
+.idea
+.vs
+/build*
