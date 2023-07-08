@@ -3,7 +3,7 @@ BasedOnStyle: WebKit
 AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: AcrossComments
 AlignConsecutiveAssignments: AcrossComments
-AlignConsecutiveDeclarations: AcrossEmptyLinesAndComments
+AlignConsecutiveDeclarations: AcrossComments
 AlignEscapedNewlines: Right
 AlignOperands: true
 AlignTrailingComments: true
