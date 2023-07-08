@@ -1,9 +1,6 @@
 #pragma once
 
-namespace PLSC
+namespace PLSC::Math
 {
-	namespace Math
-	{
-		static int test(int x) { return x * x; }
-	}
-}
+    static int test(int x) { return x * x; }
+} // namespace PLSC::Math

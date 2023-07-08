@@ -2,5 +2,5 @@
 
 namespace PLSC
 {
-	static int test(int x) { return Math::test(x); }
-}
+    static int test(int x) { return Math::test(x); }
+} // namespace PLSC

@@ -1,9 +1,9 @@
-cmake_minimum_required (VERSION 3.14)
+cmake_minimum_required(VERSION 3.14)
 
-project (
-	PLSC
-	VERSION 0.1
-	LANGUAGES CXX)
+project(
+        PLSC
+        VERSION 0.1
+        LANGUAGES CXX)
 
 add_subdirectory(src)
 
