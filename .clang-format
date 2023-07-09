@@ -28,7 +28,7 @@ CompactNamespaces: false
 
 LambdaBodyIndentation: OuterScope
 ReferenceAlignment: Right
-SeparateDefinitionBlocks: Always
+SeparateDefinitionBlocks: Leave
 PackConstructorInitializers: NextLine
 Cpp11BracedListStyle: true
 FixNamespaceComments: true
