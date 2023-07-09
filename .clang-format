@@ -18,7 +18,7 @@ AllowShortLambdasOnASingleLine: Inline
 AllowShortLoopsOnASingleLine: true
 AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: true
-BinPackParameters: false
+BinPackParameters: true
 BreakBeforeBraces: Allman
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: AfterColon
@@ -26,7 +26,10 @@ BreakInheritanceList: BeforeColon
 ColumnLimit: 110
 CompactNamespaces: false
 
-PackConstructorInitializers: CurrentLine
+LambdaBodyIndentation: OuterScope
+ReferenceAlignment: Right
+SeparateDefinitionBlocks: Always
+PackConstructorInitializers: NextLine
 Cpp11BracedListStyle: true
 FixNamespaceComments: true
 IncludeBlocks: Regroup
