@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Math/MathUtil.hpp"
-#include "Util/Typedefs.hpp"
+#include "PLSC/Math/MathUtil.hpp"
+#include "PLSC/Util/Typedefs.hpp"
 
 namespace PLSC
 {
