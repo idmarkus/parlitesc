@@ -1,9 +1,5 @@
 #pragma once
 
-#include "PLSC/Math/MathUtil.hpp"
+#include "PLSC/Math/Util.hpp"
+#include "PLSC/Physics/Solver.hpp"
 #include "PLSC/Typedefs.hpp"
-
-namespace PLSC
-{
-    static int test(int);
-}

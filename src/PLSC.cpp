@@ -2,5 +2,5 @@
 
 namespace PLSC
 {
-    static int test(int x) { return Math::test(x); }
+    //    static float test(float x) { return Math::rsqrt_fast(x); }
 } // namespace PLSC

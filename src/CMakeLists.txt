@@ -5,7 +5,7 @@ file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${PLSC_SOURCE_DIR}/src/*.c*")
 
 add_library(PLSC ${SOURCE_LIST} ${HEADER_LIST})
 
-target_include_directories(PLSC PUBLIC ../include)
+target_include_directories(PLSC PUBLIC "${PLSC_SOURCE_DIR}/include")
 
 source_group(
         TREE "${PROJECT_SOURCE_DIR}/include"
