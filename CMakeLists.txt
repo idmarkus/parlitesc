@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(
-        PLSC
+project(PLSC
         VERSION 0.1
         LANGUAGES CXX)
 
-add_subdirectory(src)
-add_subdirectory(PLSCGL)
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+endif ()
 
-set_property(TARGET PLSC PROPERTY CXX_STANDARD 20)
-set_property(TARGET PLSC PROPERTY USE_FOLDERS ON)
+add_subdirectory(PLSC)
+add_subdirectory(examples)
 
 
 

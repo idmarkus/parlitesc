@@ -1,0 +1,12 @@
+{
+  "name" : "plsc",
+  "version-string" : "1.0.0",
+  "builtin-baseline" : "dafef74af53669ef1cc9015f55e0ce809ead62aa",
+  "dependencies" : [ {
+    "name" : "glew",
+    "version>=" : "2.2.0#3"
+  }, {
+    "name" : "sdl2",
+    "version>=" : "2.26.5"
+  } ]
+}
