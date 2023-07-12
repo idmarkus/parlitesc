@@ -20,8 +20,8 @@ namespace PLSC
         std::array<Particle, Constants::MaxDynamicInstances> m_objects;
         Static::Definition                                   m_static;
 
-        u32 m_active  = 0u;
-        u32 m_updates = 0u;
+        u32  m_active  = 0u;
+        u32  m_updates = 0u;
         vec2 m_gravity = Constants::GravityPosition;
 
         void init();

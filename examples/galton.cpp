@@ -81,7 +81,7 @@ int main(int argc, char ** argv)
             if (!flipGravity)
             {
                 solver.m_gravity.y = -solver.m_gravity.y;
-                flipGravity                        = true;
+                flipGravity        = true;
             }
         }
         else if (flipGravity)

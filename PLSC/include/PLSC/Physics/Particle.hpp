@@ -19,7 +19,7 @@ namespace PLSC
         constexpr explicit Particle(vec2 const &p, vec2 const &d) : P(p), dP(d) { }
         constexpr explicit Particle(f32 const &x, f32 const &y) : P(x, y), dP(P) { }
 
-        inline void update(const vec2& gravity)
+        inline void update(const vec2 &gravity)
         {
             const vec2 v = P - dP;
             dP           = P;
@@ -55,9 +55,9 @@ namespace PLSC
             float dist = std::fabs(vd.dot(vd));
             if (dist < (Constants::CircleDiameter)) // + 0.005f))
             {
-                if (dist > FLT_EPSILON)
-                    vd *= Constants::ResponseCoef * (1.0f - rsqrt_fast(dist));
-                else vd *= Constants::ResponseCoef * (1.0f - rsqrt_fast(Constants::CircleRadius));
+                if (dist > FLT_EPSILON) vd *= Constants::ResponseCoef * (1.0f - rsqrt_fast(dist));
+                else
+                    vd *= Constants::ResponseCoef * (1.0f - rsqrt_fast(Constants::CircleRadius));
                 P -= vd;
                 ob->P += vd;
             }

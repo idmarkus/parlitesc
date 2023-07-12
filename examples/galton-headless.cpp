@@ -23,7 +23,7 @@ int main(int argc, char ** argv)
     (void) argc;
     (void) argv;
 
-    PLSC::Solver                solver;
+    PLSC::Solver solver;
 
     (void) solver.m_static.Register(MkBins, NBins);
     (void) solver.m_static.Register(
@@ -44,7 +44,7 @@ int main(int argc, char ** argv)
             if (!flipGravity)
             {
                 solver.m_gravity.y = -solver.m_gravity.y;
-                flipGravity                        = true;
+                flipGravity        = true;
             }
         }
         else if (flipGravity)

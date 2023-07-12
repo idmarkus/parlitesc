@@ -4,9 +4,9 @@
 #include "PLSC/Constants.hpp"
 #include "PLSC/Typedefs.hpp"
 
+#include <array>
 #include <memory>
 #include <vector>
-#include <array>
 
 #define RADIUSGRID_ROWCOL_ORDER 1 // 0 = ROW, 1 = COL
 namespace PLSC

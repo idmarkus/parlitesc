@@ -10,7 +10,7 @@ add_library(PLSCDEMOLIB STATIC Window.cpp Window.hpp)
 
 # SDL_MAIN_HANDLED is needed on Windows
 #if (WIN32 OR MSYS OR MINGW)
-    target_compile_definitions(PLSCDEMOLIB PUBLIC SDL_MAIN_HANDLED)
+target_compile_definitions(PLSCDEMOLIB PUBLIC SDL_MAIN_HANDLED)
 #endif ()
 
 target_include_directories(PLSCDEMOLIB PUBLIC ${PLSCDEMOLIB_SOURCE_DIR})
