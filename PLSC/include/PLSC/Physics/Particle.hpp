@@ -19,11 +19,18 @@ namespace PLSC
         constexpr explicit Particle(vec2 const &p, vec2 const &d) : P(p), dP(d) { }
         constexpr explicit Particle(f32 const &x, f32 const &y) : P(x, y), dP(P) { }
 
-        inline void update()
+        inline void update(const vec2& gravity)
         {
             const vec2 v = P - dP;
             dP           = P;
-            P += v + Constants::GravityPosition;
+            P += v + gravity;
+        }
+
+        inline f32 KE()
+        {
+            // "in joules"
+            // TODO: Update if we add units.
+            return Constants::CircleHalfMass * std::fabs(P.distSq(dP));
         }
 
         inline bool Collide(Particle * ob)
@@ -45,10 +52,12 @@ namespace PLSC
         inline void CollideFast(Particle * ob)
         {
             vec2  vd   = P - ob->P;
-            float dist = vd.dot(vd);
+            float dist = std::fabs(vd.dot(vd));
             if (dist < (Constants::CircleDiameter)) // + 0.005f))
             {
-                vd *= Constants::ResponseCoef * (1.0f - rsqrt_fast(dist));
+                if (dist > FLT_EPSILON)
+                    vd *= Constants::ResponseCoef * (1.0f - rsqrt_fast(dist));
+                else vd *= Constants::ResponseCoef * (1.0f - rsqrt_fast(Constants::CircleRadius));
                 P -= vd;
                 ob->P += vd;
             }

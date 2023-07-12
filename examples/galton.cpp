@@ -1,4 +1,5 @@
 #include "PLSC.hpp"
+#include "PLSC/Constants.hpp"
 #include "PLSC/DBG/Profile.hpp"
 #include "PLSC/GL.hpp"
 #include "Window.hpp"
@@ -46,6 +47,7 @@ int main(int argc, char ** argv)
     particleRenderer.init(window.width(), window.height());
 
     using namespace std::chrono;
+    bool flipGravity = false;
     while (!window.keyQuit())
     {
         // Update screen size
@@ -71,16 +73,35 @@ int main(int argc, char ** argv)
 
         auto t2 = high_resolution_clock::now();
 
+        f32 KE    = solver.getKE();
+        f32 KEavg = (KE / (f32) solver.m_active) * 1000.0f;
+
+        if (KEavg < 0.008f)
+        {
+            if (!flipGravity)
+            {
+                solver.m_gravity.y = -solver.m_gravity.y;
+                flipGravity                        = true;
+            }
+        }
+        else if (flipGravity)
+            flipGravity = false;
+
         duration<double> dtPHX = t1 - t0;
         duration<double> dtGFX = t2 - t1;
         duration<double> dtFPS = t2 - t0;
 
-        std::string fps = std::to_string(1.0 / dtFPS.count()).substr(0, 4) + "fps ";
-        std::string gfx = std::to_string(dtGFX.count() * 1000.0) + "ms ";
-        std::string phx = std::to_string(dtPHX.count() * 1000.0) + "ms ";
+        std::string title = "[PLSC] ";
+        /* fps */ title += std::to_string(1.0 / dtFPS.count()).substr(0, 4) + "fps ";
+        /* gfx */ title += std::to_string(dtGFX.count() * 1000.0) + "ms ";
+        /* phx */ title += std::to_string(dtPHX.count() * 1000.0) + "ms ";
+        /* KE  */ title += std::to_string(KE) + "J ";
+        /* KE% */ title += std::to_string(KEavg) + "mJ/o ";
+        title += std::to_string(flipGravity) + " ";
+        title += to_string(PLSC::Constants::GravityPosition);
         //        std::string act = std::to_string(solver.m_active);
 
-        window.setTitle("[PLSC] " + fps + gfx + phx);
+        window.setTitle(title);
     }
 
     PROFILE_OUTPUT();

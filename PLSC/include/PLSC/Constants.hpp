@@ -117,5 +117,10 @@ namespace PLSC
         static constexpr f32 SleepLimit   = 0.005f;
         static constexpr f32 SleepLimit2  = SleepLimit + SleepLimit;
         static constexpr f32 SleepLimitSq = SleepLimit * SleepLimit;
+
+        static constexpr f32 CircleArea        = M_PI * (CircleRadius * CircleRadius);
+        static constexpr f32 CircleAreaDensity = 1.0f; // TODO: Update if we add units.
+        static constexpr f32 CircleMass        = CircleArea * CircleAreaDensity;
+        static constexpr f32 CircleHalfMass    = CircleMass * 0.5f;
     } // namespace Constants
 } // namespace PLSC

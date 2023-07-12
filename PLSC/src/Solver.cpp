@@ -1,6 +1,7 @@
 #include "PLSC/Physics/Solver.hpp"
 
 #include "PLSC/Constants.hpp"
+#include "PLSC/DBG/Profile.hpp"
 #include "PLSC/Math/Util.hpp" // clamp
 
 namespace PLSC
@@ -9,6 +10,7 @@ namespace PLSC
 
     void Solver::update()
     {
+        PROFILE_COMPLEXITY(m_active);
         for (u32 i(Constants::Substep); i--;)
         {
             updateCollisions();
@@ -39,7 +41,7 @@ namespace PLSC
 
     void Solver::updateObjects()
     {
-        for (u32 i = 0; i < m_active; ++i) { m_objects[i].update(); }
+        for (u32 i = 0; i < m_active; ++i) { m_objects[i].update(m_gravity); }
     }
 
     void Solver::updateCollisions() { m_collisionStructure.update(m_active); }

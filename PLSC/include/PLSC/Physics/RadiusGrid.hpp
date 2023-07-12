@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <vector>
+#include <array>
 
 #define RADIUSGRID_ROWCOL_ORDER 1 // 0 = ROW, 1 = COL
 namespace PLSC
@@ -31,13 +32,13 @@ namespace PLSC
         //        u64 m_uCollideSuccess = 0;
 
         //-- Constants
-        static constexpr id_t BfrSize   = 2;
+        static constexpr id_t BfrSize   = 8;
         static constexpr f32  fBfrSize  = static_cast<f32>(BfrSize);
         static constexpr f32  fBfrSize2 = fBfrSize * 2.0f;
         static constexpr id_t XSize
-            = Constants::static_ceil<id_t>(Constants::WorldWidth * 2.0f) + (BfrSize * 2);
+            = Constants::static_ceil<id_t>(Constants::WorldWidth * 2.0f) + (BfrSize * 4);
         static constexpr id_t YSize
-            = Constants::static_ceil<id_t>(Constants::WorldHeight * 2.0f) + (BfrSize * 2);
+            = Constants::static_ceil<id_t>(Constants::WorldHeight * 2.0f) + (BfrSize * 4);
         static constexpr id_t NSize = XSize * YSize;
 
     private:

@@ -15,3 +15,11 @@ target_link_libraries(
         PLSC::GL
 )
 
+add_executable(PLSC-GaltonHeadless galton-headless.cpp)
+
+target_link_libraries(
+        PLSC-GaltonHeadless
+        PRIVATE
+        PLSC::PLSC
+)
+
