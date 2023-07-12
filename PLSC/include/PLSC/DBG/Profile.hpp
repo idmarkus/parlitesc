@@ -2,7 +2,7 @@
 #define PLSC_PROFILE 1
 
 // Static internal profiling without branches
-#ifdef PLSC_PROFILE
+#if PLSC_PROFILE
     #include "PLSC/Typedefs.hpp"
 
     #include <chrono>

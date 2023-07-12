@@ -19,12 +19,7 @@ namespace PLSC
         constexpr explicit Particle(vec2 const &p, vec2 const &d) : P(p), dP(d) { }
         constexpr explicit Particle(f32 const &x, f32 const &y) : P(x, y), dP(P) { }
 
-        inline void update()
-        {
-            const vec2 v = P - dP;
-            dP           = P;
-            P += v + Constants::GravityPosition;
-        }
+
 
         inline bool Collide(Particle * ob)
         {
@@ -52,6 +47,24 @@ namespace PLSC
                 P -= vd;
                 ob->P += vd;
             }
+        }
+    };
+
+    struct ParticleDelta
+    {
+        vec2 * P;
+        vec2 dP;
+
+        ParticleDelta() = default;
+        explicit ParticleDelta(Particle & p) : P(&p.P), dP(p.P.x, p.P.y) {}
+        explicit ParticleDelta(vec2 * P) : P(P), dP(P->x, P->y) {}
+        explicit ParticleDelta(vec2 * P, f32 x, f32 y) : P(P), dP(x, y) {}
+
+        inline void update()
+        {
+            const vec2 v = *P - dP;
+            dP           = *P;
+            *P += v + Constants::GravityPosition;
         }
     };
 } // namespace PLSC

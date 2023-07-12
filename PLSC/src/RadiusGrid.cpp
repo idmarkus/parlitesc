@@ -192,7 +192,7 @@ namespace PLSC
             id_t h0 = hash(ob);
             for (id_t i = m_aStaticLUT[h0]; i < m_aStaticLUT[h0 + 1]; ++i)
             {
-                m_vStaticGrid[i]->CollideFast(&ob);
+                m_vStaticGrid[i]->CollideFast(&m_deltas[ob1_id]);
             }
 
             // if (!ob.isAwake()) continue;

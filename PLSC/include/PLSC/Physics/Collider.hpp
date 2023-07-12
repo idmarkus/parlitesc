@@ -10,8 +10,8 @@ namespace PLSC::Collider
     {
     public:
         virtual bool         Intersects(Particle *) const = 0;
-        virtual bool         Collide(Particle *)          = 0;
-        virtual void         CollideFast(Particle *)      = 0;
+        virtual bool         Collide(ParticleDelta *)          = 0;
+        virtual void         CollideFast(ParticleDelta *)      = 0;
         virtual const char * Name() const                 = 0;
 
         virtual ~ICollider() { }
@@ -55,17 +55,17 @@ namespace PLSC::Collider
             return (ob->P.x > minX && ob->P.x < maxX && ob->P.y > minY && ob->P.y < maxY);
         }
 
-        inline bool Collide(Particle * ob) final
+        inline bool Collide(ParticleDelta * ob) final
         {
-            if (ob->P.x < minX || ob->P.x > maxX || ob->P.y < minY || ob->P.y > maxY) return false;
+            if (ob->P->x < minX || ob->P->x > maxX || ob->P->y < minY || ob->P->y > maxY) return false;
 
-            vec2       vd = ob->P - C;
+            vec2       vd = *ob->P - C;
             const bool hz = extent.y - std::fabs(vd.y) >= extent.x - std::fabs(vd.x);
             vd.x          = hz ? std::copysign(extent.x, vd.x) : vd.x;
             vd.y          = !hz ? std::copysign(extent.y, vd.y) : vd.y;
 
             // Closest point outward
-            ob->P = C + vd;
+            *ob->P = C + vd;
 
             // Reflect dP if outside
             const vec2 dPclamp = vec2(clamp(ob->dP.x, minX, maxX), clamp(ob->dP.y, minY, maxY));
@@ -77,7 +77,7 @@ namespace PLSC::Collider
             return true;
         }
 
-        inline void CollideFast(Particle * ob) final { Collide(ob); }
+        inline void CollideFast(ParticleDelta * ob) final { Collide(ob); }
     };
 
     struct InverseAABB : public ICollider
@@ -108,39 +108,39 @@ namespace PLSC::Collider
             return (ob->P.x < minX || ob->P.x > maxX || ob->P.y < minY || ob->P.y > maxY);
         }
 
-        inline bool Collide(Particle * ob) final
+        inline bool Collide(ParticleDelta * ob) final
         {
             using namespace Constants;
 
-            vec2 &P   = ob->P;
+            vec2 *P   = ob->P;
             vec2 &dP  = ob->dP;
             bool  ret = false;
-            if (P.x > maxX)
+            if (P->x > maxX)
             {
                 dP.x = maxX + ((maxX - dP.x) * StaticRestitution);
-                dP.y = P.y - ((P.y - dP.y) * StaticFrictionCoef);
-                P.x  = maxX;
+                dP.y = P->y - ((P->y - dP.y) * StaticFrictionCoef);
+                P->x  = maxX;
                 ret  = true;
             }
-            else if (P.x < minX)
+            else if (P->x < minX)
             {
                 dP.x = minX + ((minX - dP.x) * StaticRestitution);
-                dP.y = P.y - ((P.y - dP.y) * StaticFrictionCoef);
-                P.x  = minX;
+                dP.y = P->y - ((P->y - dP.y) * StaticFrictionCoef);
+                P->x  = minX;
                 ret  = true;
             }
-            if (P.y > maxY)
+            if (P->y > maxY)
             {
                 dP.y = maxY + ((maxY - dP.y) * StaticRestitution);
-                dP.x = dP.x + ((P.x - dP.x) * 0.04f); //(1.0f - StaticFrictionCoef));
-                P.y  = maxY;
+                dP.x = dP.x + ((P->x - dP.x) * 0.04f); //(1.0f - StaticFrictionCoef));
+                P->y  = maxY;
                 ret  = true;
             }
-            else if (P.y < minY)
+            else if (P->y < minY)
             {
                 dP.y = minY + ((minY - dP.y) * StaticRestitution);
-                dP.x = P.x - ((P.x - dP.x) * StaticFrictionCoef);
-                P.y  = minY;
+                dP.x = P->x - ((P->x - dP.x) * StaticFrictionCoef);
+                P->y  = minY;
                 ret  = true;
             }
 #ifdef PARTICLE_DBG_COLOR
@@ -149,7 +149,7 @@ namespace PLSC::Collider
             return ret;
         }
 
-        inline void CollideFast(Particle * ob) final { Collide(ob); }
+        inline void CollideFast(ParticleDelta * ob) final { Collide(ob); }
     };
 
     struct Circle : public ICollider
@@ -170,12 +170,12 @@ namespace PLSC::Collider
             return (P.distSq(ob->P) < R * R);
         }
 
-        inline bool Collide(Particle * ob) final
+        inline bool Collide(ParticleDelta * ob) final
         {
             (void) ob;
             return false;
         }
 
-        inline void CollideFast(Particle * ob) final { (void) ob; }
+        inline void CollideFast(ParticleDelta * ob) final { (void) ob; }
     };
 } // namespace PLSC::Collider

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#ifdef PLSC_PROFILE
+#if PLSC_PROFILE
 
 namespace PLSC::DBG::PROFILE
 {

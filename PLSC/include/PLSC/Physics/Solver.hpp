@@ -15,9 +15,10 @@ namespace PLSC
     class Solver
     {
     public:
-        Solver() : m_collisionStructure(&m_objects[0]) { }
+        Solver() : m_collisionStructure(&m_objects[0], &m_deltas[0]) { }
         
         std::array<Particle, Constants::MaxDynamicInstances> m_objects;
+        std::array<ParticleDelta, Constants::MaxDynamicInstances> m_deltas;
         Static::Definition                                   m_static;
 
         u32 m_active  = 0u;

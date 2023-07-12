@@ -33,13 +33,14 @@ namespace PLSC
 
             vec2 P              = {x, y};
             m_objects[m_active] = Particle(P);
+            m_deltas[m_active] = ParticleDelta(m_objects[m_active]);
             ++m_active;
         }
     }
 
     void Solver::updateObjects()
     {
-        for (u32 i = 0; i < m_active; ++i) { m_objects[i].update(); }
+        for (u32 i = 0; i < m_active; ++i) { m_deltas[i].update(); }
     }
 
     void Solver::updateCollisions() { m_collisionStructure.update(m_active); }

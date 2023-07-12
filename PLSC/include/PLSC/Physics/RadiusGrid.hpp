@@ -5,6 +5,7 @@
 #include "PLSC/Typedefs.hpp"
 
 #include <memory>
+#include <array>
 #include <vector>
 
 #define RADIUSGRID_ROWCOL_ORDER 1 // 0 = ROW, 1 = COL
@@ -18,7 +19,7 @@ namespace PLSC
         using VCollider = std::vector<collider_ptr>;
 
         //        explicit RadiusGrid(std::array<Particle, Constants::MaxDynamicInstances>);
-        explicit RadiusGrid(Particle * objects) : m_objects(objects) { }
+        explicit RadiusGrid(Particle * objects, ParticleDelta * deltas) : m_objects(objects), m_deltas(deltas) { }
         //            ~RadiusGrid();
 
         void update(u32);
@@ -44,6 +45,7 @@ namespace PLSC
         //-- Member data
         //        std::array<Particle, Constants::MaxDynamicInstances> m_objects;
         Particle *                  m_objects;
+        ParticleDelta * m_deltas;
         std::array<id_t, NSize + 1> m_aDynamicLUT = {0};
         std::array<id_t, NSize + 1> m_aStaticLUT  = {0};
 

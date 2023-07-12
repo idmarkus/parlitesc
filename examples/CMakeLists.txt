@@ -7,11 +7,20 @@ add_subdirectory(libdemo)
 
 add_executable(PLSC-Galton galton.cpp)
 
+
 target_link_libraries(
         PLSC-Galton
         PRIVATE
         PLSC::Demo
         PLSC::PLSC
         PLSC::GL
+)
+
+add_executable(PLSC-Headless headless.cpp)
+
+target_link_libraries(
+        PLSC-Headless
+        PRIVATE
+        PLSC::PLSC
 )
 
