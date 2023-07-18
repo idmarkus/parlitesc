@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PLSC/Constants.hpp"
+#include "PLSC/Definition.hpp"
 #include "PLSC/Math/Util.hpp" // rsqrt_fast
 #include "PLSC/Math/vec2.hpp"
 #include "PLSC/Typedefs.hpp"
@@ -9,6 +10,7 @@
 
 namespace PLSC
 {
+
     struct Particle
     {
         vec2 P, dP;
@@ -37,11 +39,11 @@ namespace PLSC
         {
             vec2  vd   = P - ob->P;
             float dist = std::fabs(vd.dot(vd));
-            if (dist > FLT_EPSILON && dist < (Constants::CircleDiameter))
+            if (dist > FLT_EPSILON && dist < (CFG.Diameter))
             {
                 dist = sqrtf(dist);
                 vd /= dist;
-                vd *= Constants::ResponseCoef * (dist - Constants::CircleDiameter);
+                vd *= Constants::ResponseCoef * (dist - CFG.Diameter);
                 P -= vd;
                 ob->P += vd;
                 return true;
@@ -53,7 +55,7 @@ namespace PLSC
         {
             vec2  vd   = P - ob->P;
             float dist = std::fabs(vd.dot(vd));
-            if (dist < (Constants::CircleDiameter)) // + 0.005f))
+            if (dist < (CFG.Diameter)) // + 0.005f))
             {
                 if (dist > FLT_EPSILON) vd *= Constants::ResponseCoef * (1.0f - rsqrt_fast(dist));
                 else

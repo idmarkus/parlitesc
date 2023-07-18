@@ -1,37 +1,43 @@
 #include "PLSC.hpp"
-#include "PLSC/Constants.hpp"
 #include "PLSC/DBG/Profile.hpp"
+#include "PLSC/Definition.hpp"
 #include "PLSC/GL.hpp"
 #include "Window.hpp"
 
 #include <chrono>
 #include <string>
 
-static constexpr f64 BinSize   = PLSC::Constants::CircleDiameter * 4.0f;
-static constexpr f64 BinWidth  = PLSC::Constants::CircleRadius;
-static constexpr f64 BinHeight = PLSC::Constants::WorldHeight * 0.3f;
-
-static constexpr f64    BinIncr = BinSize + BinWidth;
-static constexpr size_t NBins
-    = static_cast<size_t>((PLSC::Constants::HIGHP::WorldWidth - (BinIncr)) / BinIncr);
-
-static PLSC::Collider::AABB MkBins(size_t i)
-{
-    f32 cx = BinIncr + (BinIncr * static_cast<f32>(i));
-    f32 x0 = cx;
-    f32 x1 = cx + BinWidth;
-    f32 y0 = PLSC::Constants::WorldHeight - BinHeight;
-    f32 y1 = PLSC::Constants::WorldHeight;
-    return PLSC::Collider::AABB(x0, y0, x1, y1);
-}
-
 int main(int argc, char ** argv)
 {
     (void) argc;
     (void) argv;
 
-    PLSC::Demo::Window          window(1280, 720, 50, 50, false);
-    PLSC::Solver                solver;
+    PLSC::Demo::Window window(1280, 720, 50, 50, false);
+
+    static constexpr PLSC::Settings   cfg;
+    static constexpr PLSC::Definition def(
+        []()
+        {
+            constexpr f32 BinSize   = cfg.Radius * 8.0f;
+            constexpr f32 BinWidth  = cfg.Radius;
+            constexpr f32 BinHeight = cfg.Radius * 0.3f;
+
+            constexpr f32  BinIncr = BinSize + BinWidth;
+            constexpr auto N       = static_cast<size_t>((cfg.Width - (BinIncr)) / BinIncr);
+            return PLSC::Iterate<N>(
+                [](size_t i)
+                {
+                    f32 cx = BinIncr + (BinIncr * static_cast<f32>(i));
+                    f32 x0 = cx;
+                    f32 x1 = cx + BinWidth;
+                    f32 y0 = cfg.Height - BinHeight;
+                    f32 y1 = cfg.Height;
+                    return PLSC::AABB(x0, y0, x1, y1);
+                });
+        }(),
+        PLSC::InvBB(0, 0, cfg.Width, cfg.Height));
+
+    PLSC::Solver<cfg>           solver(def);
     PLSC::GL::Renderer          staticRenderer;
     PLSC::GL::ParticleInstancer particleRenderer(&solver.m_objects[0]);
 

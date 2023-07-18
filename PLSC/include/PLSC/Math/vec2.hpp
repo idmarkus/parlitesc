@@ -69,6 +69,8 @@ namespace PLSC
 
     inline constexpr vec2 operator+(const vec2 &v1, const vec2 &v2) { return {v1.x + v2.x, v1.y + v2.y}; }
     inline constexpr vec2 operator-(const vec2 &v1, const vec2 &v2) { return {v1.x - v2.x, v1.y - v2.y}; }
+    inline constexpr vec2 operator+(const vec2 &v, f32 f) { return {v.x + f, v.y + f}; }
+    inline constexpr vec2 operator-(const vec2 &v, f32 f) { return {v.x - f, v.y - f}; }
     // inline constexpr vec2 operator+(const vec2 &v) { return {-v.x, -v.y}; }
     inline constexpr vec2 operator-(const vec2 &v) { return {-v.x, -v.y}; }
     inline constexpr vec2 operator*(f32 f, const vec2 &v) { return {v.x * f, v.y * f}; }

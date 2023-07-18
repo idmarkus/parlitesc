@@ -1,13 +1,14 @@
 #pragma once
 
-#include "Collider.hpp"
+#if 0
+    #include "Collider.hpp"
 
-#include <memory>
-#include <vector>
+    #include <memory>
+    #include <vector>
 
 namespace PLSC::Static
 {
-    class Definition
+    class OldDefinition
     {
     public:
         std::vector<std::shared_ptr<Collider::ICollider>> m_interfaces;
@@ -57,3 +58,4 @@ namespace PLSC::Static
         }
     };
 } // namespace PLSC::Static
+#endif

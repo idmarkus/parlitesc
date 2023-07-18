@@ -1,181 +1,156 @@
 #pragma once
 
+#include "PLSC/Constants.hpp"
+#include "PLSC/Math/vec2.hpp"
+#include "PLSC/Typedefs.hpp"
 #include "Particle.hpp"
-
-#include <memory>
-
-namespace PLSC::Collider
-{
-    class ICollider
-    {
-    public:
-        virtual bool         Intersects(Particle *) const = 0;
-        virtual bool         Collide(Particle *)          = 0;
-        virtual void         CollideFast(Particle *)      = 0;
-        virtual const char * Name() const                 = 0;
-
-        virtual ~ICollider() { }
-    };
-} // namespace PLSC::Collider
 
 namespace PLSC
 {
-    using collider_ptr = std::shared_ptr<Collider::ICollider>;
-}
-
-namespace PLSC::Collider
-{
-    struct AABB : public ICollider
+    namespace Any
     {
+        enum Kind : uint8_t
+        {
+            AABB,
+            InvBB,
+            Circle
+        };
+    }
+
+    struct AABB
+    {
+        static constexpr Any::Kind Which = Any::AABB;
+
         const vec2 extent, C;
-        const f32  minX, minY, maxX, maxY;
 
-        constexpr explicit AABB(const f32 minx, const f32 miny, const f32 maxx, const f32 maxy) :
-            extent(std::fabs(maxx - minx) * 0.5f + Constants::CircleRadius,
-                   std::fabs(maxy - miny) * 0.5f + Constants::CircleRadius),
-            C(minx + ((maxx - minx) * 0.5f), miny + ((maxy - miny) * 0.5f)),
-            minX(C.x - extent.x),
-            minY(C.y - extent.y),
-            maxX(C.x + extent.x),
-            maxY(C.y + extent.y)
+        constexpr explicit AABB(f32 x0, f32 y0, f32 x1, f32 y1) :
+            extent((x1 - x0) * 0.5f, (y1 - y0) * 0.5f), C(x0 + extent.x, y0 + extent.y)
         {
         }
 
-        constexpr f32 draw_minX() const { return C.x - extent.x + Constants::CircleRadius; }
-        constexpr f32 draw_minY() const { return C.y - extent.y + Constants::CircleRadius; }
-        constexpr f32 draw_maxX() const { return C.x + extent.x - Constants::CircleRadius; }
-        constexpr f32 draw_maxY() const { return C.y + extent.y - Constants::CircleRadius; }
-
-        // virtual ~AABB() override = delete;
-
-        virtual const char * Name() const final { return "AABB"; }
-
-        inline bool Intersects(Particle * ob) const final
+        inline constexpr std::pair<vec2, vec2> minmax() const { return {C - extent, C + extent}; }
+        inline constexpr std::pair<vec2, vec2> draw_minmax() const
         {
-            return (ob->P.x > minX && ob->P.x < maxX && ob->P.y > minY && ob->P.y < maxY);
+            return {(C - extent) + Constants::CircleRadius, (C + extent) - Constants::CircleRadius};
         }
-
-        inline bool Collide(Particle * ob) final
-        {
-            if (ob->P.x < minX || ob->P.x > maxX || ob->P.y < minY || ob->P.y > maxY) return false;
-
-            vec2       vd = ob->P - C;
-            const bool hz = extent.y - std::fabs(vd.y) >= extent.x - std::fabs(vd.x);
-            vd.x          = hz ? std::copysign(extent.x, vd.x) : vd.x;
-            vd.y          = !hz ? std::copysign(extent.y, vd.y) : vd.y;
-
-            // Closest point outward
-            ob->P = C + vd;
-
-            // Reflect dP if outside
-            const vec2 dPclamp = vec2(clamp(ob->dP.x, minX, maxX), clamp(ob->dP.y, minY, maxY));
-            const vec2 dPd     = dPclamp - ob->dP;
-            ob->dP             = dPclamp + dPd;
-#ifdef PARTICLE_DBG_COLOR
-            ob->dbgColStatic += DBG_COL_INCR;
-#endif
-            return true;
-        }
-
-        inline void CollideFast(Particle * ob) final { Collide(ob); }
     };
 
-    struct InverseAABB : public ICollider
+    /// Inverse AABB, same data but objects will remain inside the bounding box. Useful for borders, etc.
+    struct InvBB : public AABB
     {
-        const vec2 C, extent;
-        const f32  minX, minY, maxX, maxY;
-
-        constexpr explicit InverseAABB(const f32 minx, const f32 miny, const f32 maxx, const f32 maxy) :
-            C(minx + ((maxx - minx) * 0.5f), miny + ((maxy - miny) * 0.5f)),
-            extent(std::fabs(maxx - minx) * 0.5f - Constants::CircleRadius,
-                   std::fabs(maxy - miny) * 0.5f - Constants::CircleRadius),
-            minX(C.x - extent.x),
-            minY(C.y - extent.y),
-            maxX(C.x + extent.x),
-            maxY(C.y + extent.y)
-        {
-        }
-
-        constexpr f32 draw_minX() const { return minX - Constants::CircleRadius; }
-        constexpr f32 draw_minY() const { return minY - Constants::CircleRadius; }
-        constexpr f32 draw_maxX() const { return maxX + Constants::CircleRadius; }
-        constexpr f32 draw_maxY() const { return maxY + Constants::CircleRadius; }
-
-        const char * Name() const final { return "InverseAABB"; }
-
-        inline bool Intersects(Particle * ob) const final
-        {
-            return (ob->P.x < minX || ob->P.x > maxX || ob->P.y < minY || ob->P.y > maxY);
-        }
-
-        inline bool Collide(Particle * ob) final
-        {
-            using namespace Constants;
-
-            vec2 &P   = ob->P;
-            vec2 &dP  = ob->dP;
-            bool  ret = false;
-            if (P.x > maxX)
-            {
-                dP.x = maxX + ((maxX - dP.x) * StaticRestitution);
-                dP.y = P.y - ((P.y - dP.y) * StaticFrictionCoef);
-                P.x  = maxX;
-                ret  = true;
-            }
-            else if (P.x < minX)
-            {
-                dP.x = minX + ((minX - dP.x) * StaticRestitution);
-                dP.y = P.y - ((P.y - dP.y) * StaticFrictionCoef);
-                P.x  = minX;
-                ret  = true;
-            }
-            if (P.y > maxY)
-            {
-                dP.y = maxY + ((maxY - dP.y) * StaticRestitution);
-                dP.x = dP.x + ((P.x - dP.x) * 0.04f); //(1.0f - StaticFrictionCoef));
-                P.y  = maxY;
-                ret  = true;
-            }
-            else if (P.y < minY)
-            {
-                dP.y = minY + ((minY - dP.y) * StaticRestitution);
-                dP.x = P.x - ((P.x - dP.x) * StaticFrictionCoef);
-                P.y  = minY;
-                ret  = true;
-            }
-#ifdef PARTICLE_DBG_COLOR
-            if (ret) ob->dbgColStatic += DBG_COL_INCR;
-#endif
-            return ret;
-        }
-
-        inline void CollideFast(Particle * ob) final { Collide(ob); }
+        static constexpr Any::Kind Which = Any::InvBB;
+        constexpr explicit InvBB(f32 x0, f32 y0, f32 x1, f32 y1) : AABB(x0, y0, x1, y1) { }
     };
 
-    struct Circle : public ICollider
+    struct Circle // TODO: Implement Circle collider
     {
-        const vec2 P;
-        const f32  r;
+        static constexpr Any::Kind Which = Any::Circle;
+        const vec2                 P;
+        const f32                  r;
 
-        constexpr explicit Circle(const vec2 &_P, const f32 _r) : P(_P), r(_r) { }
-        constexpr explicit Circle(const vec2 &_P) : P(_P), r(Constants::CircleRadius) { }
-        constexpr explicit Circle(const f32 x, const f32 y, const f32 _r) : P(x, y), r(_r) { }
-        constexpr explicit Circle(const f32 x, const f32 y) : P(x, y), r(Constants::CircleRadius) { }
-
-        const char * Name() const final { return "Circle"; }
-
-        inline bool Intersects(Particle * ob) const final
-        {
-            const f32 R = r + Constants::CircleRadius;
-            return (P.distSq(ob->P) < R * R);
-        }
-
-        inline bool Collide(Particle * ob) final
-        {
-            (void) ob;
-            return false;
-        }
-
-        inline void CollideFast(Particle * ob) final { (void) ob; }
+        constexpr explicit Circle(const vec2 &P, f32 r) : P(P), r(r) { }
+        constexpr explicit Circle(f32 x, f32 y, f32 r) : P(x, y), r(r) { }
     };
+
+    namespace Collider
+    {
+        /// Collider either monad, works like an interface but can be stored sequentially. Since shapes
+        /// need about the same amount of data there isn't much extra overhead by implementing what could be
+        /// replaced by a virtual base-class in this way, but in return we get the ability to define and store
+        /// any static collider as constexpr at compile-time
+        struct Union
+        {
+            const union
+            {
+                AABB   AABB;
+                InvBB  InvBB;
+                Circle Circle;
+            } data;
+            const Any::Kind which;
+
+            Union()                        = delete;
+            constexpr Union(Union const &) = default;
+            constexpr Union(AABB const &v) : data {.AABB = v}, which(Any::AABB) { }
+            constexpr Union(InvBB const &v) : data {.InvBB = v}, which(Any::InvBB) { }
+            constexpr Union(Circle const &v) : data {.Circle = v}, which(Any::Circle) { }
+
+            template <class C>
+            constexpr const auto as() const
+            {
+            }
+
+            template <>
+            constexpr const auto as<AABB>() const
+            {
+                return data.AABB;
+            }
+
+            template <>
+            constexpr const auto as<InvBB>() const
+            {
+                return data.InvBB;
+            }
+
+            template <>
+            constexpr const auto as<Circle>() const
+            {
+                return data.Circle;
+            }
+
+            template <Any::Kind test, Any::Kind check>
+            using which_is =
+                typename std::enable_if<std::is_same<std::integral_constant<Any::Kind, test>,
+                                                     std::integral_constant<Any::Kind, check>>::value,
+                                        bool>::type;
+
+            template <Any::Kind w, which_is<w, Any::AABB>>
+            constexpr auto ptr()
+            {
+                return &data.AABB;
+            }
+
+            template <Any::Kind w, which_is<w, Any::InvBB>>
+            constexpr auto ptr()
+            {
+                return &data.InvBB;
+            }
+
+            template <Any::Kind w, which_is<w, Any::Circle>>
+            constexpr auto ptr()
+            {
+                return &data.Circle;
+            }
+
+            template <class C>
+            constexpr const auto as_ptr() const
+            {
+            }
+
+            template <>
+            constexpr const auto as_ptr<AABB>() const
+            {
+                return &data.AABB;
+            }
+
+            template <>
+            constexpr const auto as_ptr<InvBB>() const
+            {
+                return &data.InvBB;
+            }
+
+            template <>
+            constexpr const auto as_ptr<Circle>() const
+            {
+                return &data.Circle;
+            }
+        };
+    } // namespace Collider
+    namespace Any
+    {
+        template <Collider::Union UC>
+        static constexpr auto Original_ptr()
+        {
+            return UC.ptr<UC.which>();
+        }
+    } // namespace Any
 } // namespace PLSC::Collider

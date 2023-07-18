@@ -26,7 +26,7 @@ BreakInheritanceList: BeforeColon
 ColumnLimit: 110
 CompactNamespaces: false
 
-LambdaBodyIndentation: OuterScope
+LambdaBodyIndentation: Signature
 ReferenceAlignment: Right
 SeparateDefinitionBlocks: Leave
 PackConstructorInitializers: NextLine
