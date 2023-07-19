@@ -10,6 +10,7 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set(CMAKE_CXX_STANDARD_REQUIRED 20)
 endif ()
 
+
 add_subdirectory(PLSC)
 add_subdirectory(examples)
 

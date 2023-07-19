@@ -226,22 +226,22 @@ namespace PLSC
 
 } // namespace PLSC
 
-constexpr int _f_i(size_t i) { return i + i * i; }
-int           _ff_i(size_t i) { return i + i * i; }
+  // constexpr int _f_i(size_t i) { return i + i * i; }
+// int           _ff_i(size_t i) { return i + i * i; }
 
-#include <cmath>
-void f__test()
-{
-    static constexpr auto arr  = PLSC::Iterate<5>([](const size_t i) { return i * i; });
-    static constexpr auto arr1 = PLSC::Iterate<20>([](auto i) { return std::array<int, 5> {1, 2, 3, 4, 5}; });
-    static constexpr auto arr2 = PLSC::Iterate<15>(_f_i);
-    auto                  arr3 = PLSC::Iterate<10>(_ff_i);
-
-    static constexpr PLSC::Number n0  = 2;
-    static constexpr PLSC::Number n1  = -3.1415;
-    static constexpr int          cl0 = PLSC::Const::static_ceil(n0);
-    static constexpr int          cl1 = PLSC::Const::static_ceil(n1);
-    constexpr auto                cs1 = static_cast<intmax_t>(n1);
-    constexpr auto                cs2 = static_cast<PLSC::Number>(cs1) == n1;
-    constexpr auto                cs3 = static_cast<intmax_t>(n1) + ((n1))
-}
+// #include <cmath>
+// void f__test()
+//{
+//     static constexpr auto arr  = PLSC::Iterate<5>([](const size_t i) { return i * i; });
+//     static constexpr auto arr1 = PLSC::Iterate<20>([](auto i) { return std::array<int, 5> {1, 2, 3, 4, 5};
+//     }); static constexpr auto arr2 = PLSC::Iterate<15>(_f_i); auto                  arr3 =
+//     PLSC::Iterate<10>(_ff_i);
+//
+//     static constexpr PLSC::Number n0  = 2;
+//     static constexpr PLSC::Number n1  = -3.1415;
+//     static constexpr int          cl0 = PLSC::roundexpr::static_ceil(n0);
+//     static constexpr int          cl1 = PLSC::roundexpr::static_ceil(n1);
+//     constexpr auto                cs1 = static_cast<intmax_t>(n1);
+//     constexpr auto                cs2 = static_cast<PLSC::Number>(cs1) == n1;
+//     constexpr auto                cs3 = static_cast<intmax_t>(n1) + ((n1))
+// }

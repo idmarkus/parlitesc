@@ -1,5 +1,4 @@
 #pragma once
-#include "PLSC/DBG/Profile.hpp"
 
 #include <cstdint>
 
@@ -25,5 +24,5 @@ typedef uint64_t u64_t;
 namespace PLSC
 {
     // Arithmetic type used for user settings
-    using Number = long double;
+    using Number = double;
 } // namespace PLSC

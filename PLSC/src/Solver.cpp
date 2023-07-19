@@ -1,14 +1,16 @@
-#include "PLSC/Physics/Solver.hpp"
+#if 0
+    #include "PLSC/Physics/Solver.hpp"
 
-#include "PLSC/Constants.hpp"
-#include "PLSC/DBG/Profile.hpp"
-#include "PLSC/Math/Util.hpp" // clamp
+    #include "PLSC/Constants.hpp"
+    #include "PLSC/DBG/Profile.hpp"
+    #include "PLSC/Math/Util.hpp" // clamp
 
 namespace PLSC
 {
-    void Solver::init() { m_collisionStructure.mkStatic(m_static.m_interfaces); }
-
-    void Solver::update()
+    //    template <PCFG::Settings CFG>
+    //    void Solver::init() { m_collisionStructure.mkStatic(m_static.m_interfaces); }
+    template <PCFG::Settings CFG>
+    void Solver<CFG>::update()
     {
         PROFILE_COMPLEXITY(m_active);
         for (u32 i(Constants::Substep); i--;)
@@ -18,8 +20,8 @@ namespace PLSC
         }
         ++m_updates;
     }
-
-    void Solver::spawnRandom()
+    template <PCFG::Settings CFG>
+    void Solver<CFG>::spawnRandom()
     {
         if (m_active >= Constants::MaxDynamicInstances) return;
         for (u32 i = 0; i < Constants::CirclesPerWidth; ++i)
@@ -34,15 +36,19 @@ namespace PLSC
             x += (Constants::CircleDiameter * rand_norm0) - Constants::CircleRadius;
 
             vec2 P              = {x, y};
-            m_objects[m_active] = Particle(P);
+            m_objects[m_active] = Particle<CFG>(P);
             ++m_active;
         }
     }
-
-    void Solver::updateObjects()
+    template <PCFG::Settings CFG>
+    void Solver<CFG>::updateObjects()
     {
         for (u32 i = 0; i < m_active; ++i) { m_objects[i].update(m_gravity); }
     }
-
-    void Solver::updateCollisions() { m_collisionStructure.update(m_active); }
+    template <PCFG::Settings CFG>
+    void Solver<CFG>::updateCollisions()
+    {
+        m_collisionStructure.update(m_active);
+    }
 } // namespace PLSC
+#endif

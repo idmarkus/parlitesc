@@ -31,7 +31,9 @@ namespace PLSC
         inline constexpr std::pair<vec2, vec2> minmax() const { return {C - extent, C + extent}; }
         inline constexpr std::pair<vec2, vec2> draw_minmax() const
         {
-            return {(C - extent) + Constants::CircleRadius, (C + extent) - Constants::CircleRadius};
+            return minmax();
+            //            return {(C - extent) + Constants::CircleRadius, (C + extent) -
+            //            Constants::CircleRadius};
         }
     };
 
@@ -74,28 +76,28 @@ namespace PLSC
             constexpr Union(InvBB const &v) : data {.InvBB = v}, which(Any::InvBB) { }
             constexpr Union(Circle const &v) : data {.Circle = v}, which(Any::Circle) { }
 
-            template <class C>
-            constexpr const auto as() const
-            {
-            }
-
-            template <>
-            constexpr const auto as<AABB>() const
-            {
-                return data.AABB;
-            }
-
-            template <>
-            constexpr const auto as<InvBB>() const
-            {
-                return data.InvBB;
-            }
-
-            template <>
-            constexpr const auto as<Circle>() const
-            {
-                return data.Circle;
-            }
+            //            template <class C>
+            //            constexpr const auto as() const
+            //            {
+            //            }
+            //
+            //            template <>
+            //            constexpr const auto as<AABB>() const
+            //            {
+            //                return data.AABB;
+            //            }
+            //
+            //            template <>
+            //            constexpr const auto as<InvBB>() const
+            //            {
+            //                return data.InvBB;
+            //            }
+            //
+            //            template <>
+            //            constexpr const auto as<Circle>() const
+            //            {
+            //                return data.Circle;
+            //            }
 
             template <Any::Kind test, Any::Kind check>
             using which_is =
@@ -103,43 +105,60 @@ namespace PLSC
                                                      std::integral_constant<Any::Kind, check>>::value,
                                         bool>::type;
 
+            template <typename C>
+            constexpr C get() const
+            {
+                switch (C::Which)
+                {
+                    case (Any::AABB): return data.AABB;
+                    case (Any::InvBB): return data.InvBB;
+                    case (Any::Circle): return data.Circle;
+                }
+            }
+
+            template <typename C>
+            constexpr const C * get_ptr() const
+            {
+                switch (C::Which)
+                {
+                    case (Any::AABB): return &data.AABB;
+                    case (Any::InvBB): return &data.InvBB;
+                    case (Any::Circle): return &data.Circle;
+                }
+            }
+
             template <Any::Kind w, which_is<w, Any::AABB>>
-            constexpr auto ptr()
+            constexpr auto as()
+            {
+                return data.AABB;
+            }
+
+            template <Any::Kind w, which_is<w, Any::InvBB>>
+            constexpr auto as()
+            {
+                return data.InvBB;
+            }
+
+            template <Any::Kind w, which_is<w, Any::Circle>>
+            constexpr auto as()
+            {
+                return data.Circle;
+            }
+
+            template <Any::Kind w, which_is<w, Any::AABB>>
+            constexpr const auto as_ptr() const
             {
                 return &data.AABB;
             }
 
             template <Any::Kind w, which_is<w, Any::InvBB>>
-            constexpr auto ptr()
+            constexpr const auto as_ptr() const
             {
                 return &data.InvBB;
             }
 
             template <Any::Kind w, which_is<w, Any::Circle>>
-            constexpr auto ptr()
-            {
-                return &data.Circle;
-            }
-
-            template <class C>
             constexpr const auto as_ptr() const
-            {
-            }
-
-            template <>
-            constexpr const auto as_ptr<AABB>() const
-            {
-                return &data.AABB;
-            }
-
-            template <>
-            constexpr const auto as_ptr<InvBB>() const
-            {
-                return &data.InvBB;
-            }
-
-            template <>
-            constexpr const auto as_ptr<Circle>() const
             {
                 return &data.Circle;
             }
@@ -150,7 +169,68 @@ namespace PLSC
         template <Collider::Union UC>
         static constexpr auto Original_ptr()
         {
-            return UC.ptr<UC.which>();
+            return UC.as_ptr<UC.which>();
         }
+
+        template <class C>
+        static constexpr const C * As_ptr(const Collider::Union &uc)
+        {
+            switch (C::Which)
+            {
+                case (Any::AABB): return &uc.data.AABB;
+                case (Any::InvBB): return &uc.data.InvBB;
+                case (Any::Circle): return &uc.data.Circle;
+            }
+        }
+
+        template <class C>
+        struct AsPtr
+        {
+        };
+
+        template <>
+        struct AsPtr<PLSC::AABB>
+        {
+            const PLSC::AABB * const ptr;
+            constexpr AsPtr(const Collider::Union &uc) : ptr(&uc.data.AABB) { }
+        };
+
+        template <>
+        struct AsPtr<PLSC::InvBB>
+        {
+            const PLSC::InvBB * const ptr;
+            constexpr AsPtr(const Collider::Union &uc) : ptr(&uc.data.InvBB) { }
+        };
+
+        template <>
+        struct AsPtr<PLSC::Circle>
+        {
+            const PLSC::Circle * const ptr;
+            constexpr AsPtr(const Collider::Union &uc) : ptr(&uc.data.Circle) { }
+        };
+
+        //        template <class C>
+        //        static constexpr auto As(Collider::Union const &uc)
+        //        {
+        //        }
+        //
+        //        template <>
+        //        static constexpr auto As<PLSC::AABB>(Collider::Union const &uc)
+        //        {
+        //            return &uc.data.AABB;
+        //        }
+        //
+        //        template <>
+        //        static constexpr auto As<PLSC::InvBB>(Collider::Union const &uc)
+        //        {
+        //            return &uc.data.InvBB;
+        //        }
+        //
+        //        template <>
+        //        static constexpr auto As<PLSC::Circle>(Collider::Union const &uc)
+        //        {
+        //            return &uc.data.Circle;
+        //        }
+
     } // namespace Any
 } // namespace PLSC::Collider

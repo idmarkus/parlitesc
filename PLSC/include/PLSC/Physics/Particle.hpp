@@ -1,9 +1,9 @@
 #pragma once
 
 #include "PLSC/Constants.hpp"
-#include "PLSC/Definition.hpp"
 #include "PLSC/Math/Util.hpp" // rsqrt_fast
 #include "PLSC/Math/vec2.hpp"
+#include "PLSC/Settings.hpp"
 #include "PLSC/Typedefs.hpp"
 
 #include <cfloat> // FLT_EPSILON
@@ -11,6 +11,7 @@
 namespace PLSC
 {
 
+    template <PCFG::Settings CFG>
     struct Particle
     {
         vec2 P, dP;
@@ -32,18 +33,18 @@ namespace PLSC
         {
             // "in joules"
             // TODO: Update if we add units.
-            return Constants::CircleHalfMass * std::fabs(P.distSq(dP));
+            return CFG::ParticleHalfMass * std::fabs(P.distSq(dP));
         }
 
         inline bool Collide(Particle * ob)
         {
             vec2  vd   = P - ob->P;
             float dist = std::fabs(vd.dot(vd));
-            if (dist > FLT_EPSILON && dist < (CFG.Diameter))
+            if (dist > FLT_EPSILON && dist < (CFG::Diameter))
             {
                 dist = sqrtf(dist);
                 vd /= dist;
-                vd *= Constants::ResponseCoef * (dist - CFG.Diameter);
+                vd *= CFG::ResponseCoef * (dist - CFG::Diameter);
                 P -= vd;
                 ob->P += vd;
                 return true;
@@ -55,11 +56,11 @@ namespace PLSC
         {
             vec2  vd   = P - ob->P;
             float dist = std::fabs(vd.dot(vd));
-            if (dist < (CFG.Diameter)) // + 0.005f))
+            if (dist < (CFG::Diameter)) // + 0.005f))
             {
-                if (dist > FLT_EPSILON) vd *= Constants::ResponseCoef * (1.0f - rsqrt_fast(dist));
+                if (dist > FLT_EPSILON) vd *= CFG::ResponseCoef * (1.0f - rsqrt_fast(dist));
                 else
-                    vd *= Constants::ResponseCoef * (1.0f - rsqrt_fast(Constants::CircleRadius));
+                    vd *= CFG::ResponseCoef * (1.0f - rsqrt_fast(CFG::Radius));
                 P -= vd;
                 ob->P += vd;
             }

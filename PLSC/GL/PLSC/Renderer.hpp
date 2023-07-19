@@ -1,6 +1,7 @@
 #pragma once
 
-#include "PLSC/Constants.hpp"
+// #include "PLSC/Constants.hpp"
+#include "PLSC/Settings.hpp"
 #include "Shader.hpp"
 #include "ShapeDefinitions.hpp"
 
@@ -9,6 +10,7 @@
 
 namespace PLSC::GL
 {
+    template <PCFG::Settings CFG>
     class StaticRenderer
     {
         GLuint VAO, VBO, EBO;
@@ -24,7 +26,7 @@ namespace PLSC::GL
             m_vertices(ShapeDefinition<T>::vertices(*p)),
             m_indices(ShapeDefinition<T>::indices(*p))
         {
-            m_shader.setVec2("worldSize", Constants::WorldWidth, Constants::WorldHeight);
+            m_shader.setVec2("worldSize", CFG::Width, CFG::Height);
         }
 
         void init(i32 w, i32 h)
@@ -81,11 +83,11 @@ namespace PLSC::GL
             glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
         }
     };
-
+    template <PCFG::Settings CFG>
     class Renderer
     {
     private:
-        std::vector<StaticRenderer> m_vStatic;
+        std::vector<StaticRenderer<CFG>> m_vStatic;
 
     public:
         template <typename T>

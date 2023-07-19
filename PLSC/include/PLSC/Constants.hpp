@@ -1,4 +1,5 @@
-#pragma once
+#if 0
+    #pragma once
 
 #include "PLSC/Math/vec2.hpp"
 #include "PLSC/Typedefs.hpp"
@@ -124,3 +125,4 @@ namespace PLSC
         static constexpr f32 CircleHalfMass    = CircleMass * 0.5f;
     } // namespace Constants
 } // namespace PLSC
+#endif

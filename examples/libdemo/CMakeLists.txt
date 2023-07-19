@@ -6,7 +6,7 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 
-add_library(PLSCDEMOLIB STATIC Window.cpp Window.hpp)
+add_library(PLSCDEMOLIB OBJECT Window.cpp Window.hpp)
 
 # SDL_MAIN_HANDLED is needed on Windows
 #if (WIN32 OR MSYS OR MINGW)

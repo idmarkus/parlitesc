@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PLSC/Constants.hpp"
+// #include "PLSC/Constants.hpp"
 #include "PLSC/Math/vec2.hpp"
 #include "PLSC/Physics/Particle.hpp"
 #include "Shader.hpp"
@@ -10,23 +10,24 @@
 #include <array>
 namespace PLSC::GL
 {
+    template <PCFG::Settings CFG>
     class ParticleInstancer
     {
     private:
         GLuint VAO, VBO, EBO, instanceVBO;
 
-        std::array<vec2, Constants::MaxDynamicInstances> m_aData;
-        Particle *                                       m_objects;
+        std::array<vec2, CFG::Particles> m_aData;
+        Particle<CFG> *                  m_objects;
         //        std::array<Particle, Constants::MaxDynamicInstances> m_objects;
 
     public:
         Shader shader;
         u32    m_active = 0u;
 
-        ParticleInstancer(Particle * objects) : shader(vertCircle, fragCircle), m_objects(objects)
+        ParticleInstancer(Particle<CFG> * objects) : shader(vertCircle, fragCircle), m_objects(objects)
         {
-            shader.setFloat("radius", Constants::CircleRadius);
-            shader.setVec2("worldSize", Constants::WorldWidth, Constants::WorldHeight);
+            shader.setFloat("radius", CFG::Radius);
+            shader.setVec2("worldSize", CFG::Width, CFG::Height);
         }
 
         void init(i32 w, i32 h)
@@ -70,7 +71,7 @@ namespace PLSC::GL
             m_active = active;
             for (u32 i = 0; i < active; ++i)
             {
-                PLSC::Particle * p = &m_objects[i];
+                PLSC::Particle<CFG> * p = &m_objects[i];
                 m_aData[i]         = p->P;
             }
             glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
