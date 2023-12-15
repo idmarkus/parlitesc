@@ -48,7 +48,7 @@ namespace PLSC::GL
     SDF_(AABB, vertRect, fragRect);
     VFN_(AABB)
     {
-        auto [min, max] = o.draw_minmax();
+        auto [min, max] = o.minmax();
         return {min.x, max.y, max.x, max.y, max.x, min.y, min.x, min.y};
     }
     IFN_(AABB) {_IDefault_}
@@ -57,7 +57,7 @@ namespace PLSC::GL
     SDF_(InvBB, vertRect, fragRect);
     VFN_(InvBB)
     {
-        auto [min, max] = o.draw_minmax();
+        auto [min, max] = o.minmax();
         f32 border      = 1.0f;
         f32 x1          = min.x;
         f32 y1          = min.y;

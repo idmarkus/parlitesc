@@ -10,6 +10,7 @@ AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: false
 AllowAllConstructorInitializersOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
+
 AllowShortBlocksOnASingleLine: Always
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
@@ -17,19 +18,47 @@ AllowShortIfStatementsOnASingleLine: Always
 AllowShortLambdasOnASingleLine: Inline
 AllowShortLoopsOnASingleLine: true
 AlwaysBreakTemplateDeclarations: Yes
+
 BinPackArguments: true
 BinPackParameters: true
-BreakBeforeBraces: Allman
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: MultiLine
+  AfterEnum: true
+  AfterExternBlock: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterObjCDeclaration: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: true
+  BeforeWhile: false
+
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+
+
+
+SpaceBeforeCpp11BracedList: true
+SpaceInEmptyBlock: false
+SpaceAroundPointerQualifiers: Both
+
+BreakAfterAttributes: Leave
+BreakBeforeConceptDeclarations: Allowed
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializers: AfterColon
+BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: BeforeColon
 ColumnLimit: 110
 CompactNamespaces: false
 
 LambdaBodyIndentation: Signature
-ReferenceAlignment: Right
+ReferenceAlignment: Middle
 SeparateDefinitionBlocks: Leave
-PackConstructorInitializers: NextLine
+PackConstructorInitializers: Never
 Cpp11BracedListStyle: true
 FixNamespaceComments: true
 IncludeBlocks: Regroup

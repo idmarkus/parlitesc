@@ -10,9 +10,9 @@ add_executable(PLSC-Galton galton.cpp)
 target_link_libraries(
         PLSC-Galton
         PRIVATE
-        PLSC::Demo
         PLSC::PLSC
         PLSC::GL
+        PLSC::Demo
 )
 
 add_executable(PLSC-GaltonHeadless galton-headless.cpp)

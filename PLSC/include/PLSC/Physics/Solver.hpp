@@ -13,17 +13,14 @@
 
 namespace PLSC
 {
-    template <PCFG::Settings CFG>
+    template <PCFG::Settings CFG = PLSC::Settings<>, PCFG::Definition DEF = PLSC::Definition<CFG>>
     class Solver
     {
     public:
-        template <class... Cs>
-        explicit Solver(Definition<Cs...> def) : m_collisionStructure(def.data, &m_objects[0])
-        {
-        }
+        explicit Solver() : m_collisionStructure(&m_objects[0]) { }
 
-        //        static std::array<Particle<CFG>, CFG::Particles> m_objects;
-        Particle<CFG> m_objects[CFG::Particles];
+        std::array<Particle<CFG>, CFG::Particles> m_objects;
+        //        Particle<CFG> m_objects[CFG::Particles];
 
         u32  m_active  = 0u;
         u32  m_updates = 0u;
@@ -66,7 +63,8 @@ namespace PLSC
         }
 
     private:
-        mutable RadiusGrid<CFG> m_collisionStructure;
+    public:
+        RadiusGrid<CFG, DEF> m_collisionStructure;
 
         void updateObjects()
         {

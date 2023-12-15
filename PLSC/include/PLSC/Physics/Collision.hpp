@@ -7,33 +7,41 @@
 
 namespace PLSC
 {
+    using IntersectsBucketFn = bool (*)(vec2 const &);
+
     /// Templated interface lookup, implements collision routines for all shapes. Requires library to be
     /// static and any non-particle collider constexpr. Can be substituted with runtime lookup if support
     /// for dynamic linking or runtime definition of static colliders is necessary later.
-    template <Any::Kind k, PCFG::Settings CFG>
+    template <PCFG::Settings CFG, auto collider>
     struct Collision
     {
-        static constexpr bool Intersects(Collider::Union const &uc, Particle<CFG> const &p) { return false; }
-        static inline bool    Collide(Collider::Union const &uc, Particle<CFG> * p) { return false; }
-        static inline void    CollideFast(Collider::Union const &uc, Particle<CFG> * p) { }
+        //        static constexpr bool Intersects(Collider::Union const &uc, Particle<CFG> const &p) { return
+        //        false; } static inline bool    Collide(Collider::Union const &uc, Particle<CFG> * p) {
+        //        return false; } static inline void    CollideFast(Collider::Union const &uc, Particle<CFG> *
+        //        p) { }
     };
 
-    template <PCFG::Settings CFG>
-    struct Collision<Any::AABB, CFG>
+    template <PCFG::Settings CFG, AABB collider>
+    struct Collision<CFG, collider>
     {
-        static inline constexpr bool Intersects(Collider::Union const &uc, Particle<CFG> const &ob)
+        static constexpr bool IntersectsBucket(vec2 const &c)
         {
-            const auto [min, max] = uc.data.AABB.minmax();
+            const auto [min, max] = collider.minmax(CFG::Diameter);
+            return (c.x > min.x && c.x < max.x && c.y > min.y && c.y < max.y);
+        }
+        static inline constexpr bool Intersects(Particle<CFG> const &ob)
+        {
+            const auto [min, max] = collider.minmax(CFG::Radius);
             return (ob.P.x > min.x && ob.P.x < max.x && ob.P.y > min.y && ob.P.y < max.y);
         }
 
-        static inline bool Collide(Collider::Union const &uc, Particle<CFG> * ob)
+        static inline void Collide(Particle<CFG> * ob)
         {
-            const auto [min, max] = uc.data.AABB.minmax();
-            if (ob->P.x < min.x || ob->P.x > max.x || ob->P.y < min.y || ob->P.y > max.y) return false;
+            const auto [min, max] = collider.minmax(CFG::Radius);
+            if (ob->P.x < min.x || ob->P.x > max.x || ob->P.y < min.y || ob->P.y > max.y) return;
 
-            vec2 const &C      = uc.data.AABB.C;
-            vec2 const &extent = uc.data.AABB.extent;
+            constexpr vec2 const &C      = collider.C;
+            constexpr vec2 const &extent = collider.extent;
 
             vec2       vd = ob->P - C;
             const bool hz = extent.y - std::fabs(vd.y) >= extent.x - std::fabs(vd.x);
@@ -47,105 +55,76 @@ namespace PLSC
             const vec2 dPclamp = vec2(clamp(ob->dP.x, min.x, max.x), clamp(ob->dP.y, min.y, max.y));
             const vec2 dPd     = dPclamp - ob->dP;
             ob->dP             = dPclamp + dPd;
-
-            return true;
-        }
-
-        static inline void CollideFast(Collider::Union const &uc, Particle<CFG> * ob)
-        {
-            (void) Collide(uc, ob);
         }
     };
 
-    template <PCFG::Settings CFG>
-    struct Collision<Any::InvBB, CFG>
+    template <PCFG::Settings CFG, InvBB collider>
+    struct Collision<CFG, collider>
     {
-        static inline constexpr bool Intersects(Collider::Union const &uc, Particle<CFG> const &ob)
+        static constexpr bool IntersectsBucket(vec2 const &c)
         {
-            const auto [min, max] = uc.data.InvBB.minmax();
+            const auto [min, max] = collider.minmax(CFG::Diameter);
+            return (c.x < min.x || c.x > max.x || c.y < min.y || c.y > max.y);
+        }
+        static inline constexpr bool Intersects(Particle<CFG> const &ob)
+        {
+            const auto [min, max] = collider.minmax(CFG::Radius);
             return (ob.P.x < min.x || ob.P.x > max.x || ob.P.y < min.y || ob.P.y > max.y);
         }
 
-        static inline bool Collide(Collider::Union const &uc, Particle<CFG> * ob)
+        static inline void Collide(Particle<CFG> * ob)
         {
-            static const auto [min, max] = uc.data.InvBB.minmax();
+            const auto [min, max] = collider.minmax(CFG::Radius);
 
-            vec2 &P   = ob->P;
-            vec2 &dP  = ob->dP;
-            bool  ret = false;
+            vec2 &P  = ob->P;
+            vec2 &dP = ob->dP;
+
             if (P.x > max.x)
             {
                 dP.x = max.x + ((max.x - dP.x) * 0.95f);
                 dP.y = P.y - ((P.y - dP.y) * 0.95f);
                 P.x  = max.x;
-                ret  = true;
             }
             else if (P.x < min.x)
             {
                 dP.x = min.x + ((min.x - dP.x) * 0.95f);
                 dP.y = P.y - ((P.y - dP.y) * 0.95f);
                 P.x  = min.x;
-                ret  = true;
             }
             if (P.y > max.y)
             {
                 dP.y = max.y + ((max.y - dP.y) * 0.95f);
                 dP.x = dP.x + ((P.x - dP.x) * 0.04f); //(1.0f - 0.95f));
                 P.y  = max.y;
-                ret  = true;
             }
             else if (P.y < min.y)
             {
                 dP.y = min.y + ((min.y - dP.y) * 0.95f);
                 dP.x = P.x - ((P.x - dP.x) * 0.95f);
                 P.y  = min.y;
-                ret  = true;
             }
-
-            return ret;
-        }
-
-        static inline void CollideFast(Collider::Union const &uc, Particle<CFG> * ob)
-        {
-            (void) Collide(uc, ob);
         }
     };
 
-    template <PCFG::Settings CFG>
-    struct Collision<Any::Circle, CFG>
+    template <PCFG::Settings CFG, Circle collider>
+    struct Collision<CFG, collider>
     {
-        static constexpr bool Intersects(Collider::Union const &uc, Particle<CFG> const &ob)
+        static constexpr bool IntersectsBucket(vec2 const &c)
         {
-            const f32 R = uc.data.Circle.r + CFG::Radius;
-            return (uc.data.Circle.P.distSq(ob.P) < R * R);
+            const vec2  min = c - CFG::Diameter - collider.r;
+            const vec2  max = c + CFG::Diameter + collider.r;
+            const vec2 &P   = collider.P;
+            return (P.x > min.x && P.x < max.x && P.y > min.y && P.y < max.y);
         }
-        static inline bool Collide(Collider::Union const &uc, Particle<CFG> * p) { return false; }
-        static inline void CollideFast(Collider::Union const &uc, Particle<CFG> * p) { }
+
+        static constexpr bool Intersects(Particle<CFG> const &ob)
+        {
+            constexpr f32 R = collider.r + CFG::Radius;
+            return (collider.P.distSq(ob.P) < R * R);
+        }
+        static inline void Collide(Particle<CFG> * p) { }
     };
 
-    template <PCFG::Settings CFG>
-    bool CollideRT(const Collider::Union &uc, Particle<CFG> * p)
-    {
-        switch (uc.which)
-        {
-            case (Any::AABB): return Collision<Any::AABB, CFG>::Collide(uc, p);
-            case (Any::InvBB): return Collision<Any::InvBB, CFG>::Collide(uc, p);
-            case (Any::Circle): return Collision<Any::Circle, CFG>::Collide(uc, p);
-        }
-        return false;
-    }
-
-    template <PCFG::Settings CFG>
-    bool IntersectsRT(const Collider::Union &uc, Particle<CFG> const &p)
-    {
-        switch (uc.which)
-        {
-            case (Any::AABB): return Collision<Any::AABB, CFG>::Intersects(uc, p);
-            case (Any::InvBB): return Collision<Any::InvBB, CFG>::Intersects(uc, p);
-            case (Any::Circle): return Collision<Any::Circle, CFG>::Intersects(uc, p);
-        }
-        return false;
-    }
 } // namespace PLSC
 
   // namespace PLSC

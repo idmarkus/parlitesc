@@ -1,13 +1,13 @@
-#pragma once
-#pragma once
+#if 0
+    #pragma once
 
-#include "PLSC/Math/Util.hpp"
-#include "PLSC/Math/vec2.hpp"
-#include "Typedefs.hpp"
+    #include "PLSC/Math/Util.hpp"
+    #include "PLSC/Math/vec2.hpp"
+    #include "Typedefs.hpp"
 
-#include <cfloat>
-#include <cmath>
-#include <type_traits>
+    #include <cfloat>
+    #include <cmath>
+    #include <type_traits>
 
 namespace PLSC
 {
@@ -62,17 +62,17 @@ namespace PLSC
             return Implode(static_cast<Number>(a), static_cast<Number>(b));
         }
 
-#define mk_setting(NAME, TYPE, DEFAULT)                                                                      \
-    struct NAME                                                                                              \
-    {                                                                                                        \
-        using Type                      = TYPE;                                                              \
-        static constexpr TYPE m_default = DEFAULT;                                                           \
-    };                                                                                                       \
-    template <intmax_t Whole, uintmax_t Decimal>                                                             \
-    struct User##NAME : NAME                                                                                 \
-    {                                                                                                        \
-        static constexpr TYPE m_value = Implode(Whole, Decimal);                                             \
-    };
+    #define mk_setting(NAME, TYPE, DEFAULT)                                                                  \
+        struct NAME                                                                                          \
+        {                                                                                                    \
+            using Type                      = TYPE;                                                          \
+            static constexpr TYPE m_default = DEFAULT;                                                       \
+        };                                                                                                   \
+        template <intmax_t Whole, uintmax_t Decimal>                                                         \
+        struct User##NAME : NAME                                                                             \
+        {                                                                                                    \
+            static constexpr TYPE m_value = Implode(Whole, Decimal);                                         \
+        };
 
         mk_setting(Radius, f32, 0.0035);
         mk_setting(Width, f32, 1.5);
@@ -83,7 +83,7 @@ namespace PLSC
         mk_setting(Particles, u32, 1000);
         mk_setting(Substeps, u32, 12);
 
-#undef mk_setting
+    #undef mk_setting
     } // namespace Impl
 
     template <class... Setting>
@@ -134,18 +134,21 @@ namespace PLSC
         static constexpr f32 ParticleHalfMass    = ParticleMass * 0.5f;
     };
     //-- Decimal settings
-#define SetRadius(VAL) PLSC::Impl::UserRadius<PLSC::Impl::ExpandWhole((VAL)), PLSC::Impl::ExpandDec((VAL))>
-#define SetWidth(VAL)  PLSC::Impl::UserWidth<PLSC::Impl::ExpandWhole(((VAL))), PLSC::Impl::ExpandDec((VAL))>
-#define SetHeight(VAL) PLSC::Impl::UserHeight<PLSC::Impl::ExpandWhole((VAL)), PLSC::Impl::ExpandDec((VAL))>
-#define SetFramerate(VAL)                                                                                    \
-    PLSC::Impl::UserFramerate<PLSC::Impl::ExpandWhole((VAL)), PLSC::Impl::ExpandDec((VAL))>
-#define SetGravity(VAL)                                                                                      \
-    PLSC::Impl::UserGravity1d<PLSC::Impl::ExpandWhole((VAL)), PLSC::Impl::ExpandDec((VAL))>
-#define SetResponseCoef(VAL)                                                                                 \
-    PLSC::Impl::UserResponseCoef<PLSC::Impl::ExpandWhole((VAL)), PLSC::Impl::ExpandDec((VAL))>
+    #define SetRadius(VAL)                                                                                   \
+        PLSC::Impl::UserRadius<PLSC::Impl::ExpandWhole((VAL)), PLSC::Impl::ExpandDec((VAL))>
+    #define SetWidth(VAL)                                                                                    \
+        PLSC::Impl::UserWidth<PLSC::Impl::ExpandWhole(((VAL))), PLSC::Impl::ExpandDec((VAL))>
+    #define SetHeight(VAL)                                                                                   \
+        PLSC::Impl::UserHeight<PLSC::Impl::ExpandWhole((VAL)), PLSC::Impl::ExpandDec((VAL))>
+    #define SetFramerate(VAL)                                                                                \
+        PLSC::Impl::UserFramerate<PLSC::Impl::ExpandWhole((VAL)), PLSC::Impl::ExpandDec((VAL))>
+    #define SetGravity(VAL)                                                                                  \
+        PLSC::Impl::UserGravity1d<PLSC::Impl::ExpandWhole((VAL)), PLSC::Impl::ExpandDec((VAL))>
+    #define SetResponseCoef(VAL)                                                                             \
+        PLSC::Impl::UserResponseCoef<PLSC::Impl::ExpandWhole((VAL)), PLSC::Impl::ExpandDec((VAL))>
 //-- Integral settings
-#define SetParticles(VAL) PLSC::Impl::UserParticles<intmax_t((VAL)), 0>
-#define SetSubsteps(VAL)  PLSC::Impl::UserSubsteps<intmax_t((VAL)), 0>
+    #define SetParticles(VAL) PLSC::Impl::UserParticles<intmax_t((VAL)), 0>
+    #define SetSubsteps(VAL)  PLSC::Impl::UserSubsteps<intmax_t((VAL)), 0>
 
     using Set = PLSC::Settings<SetRadius(14.155), SetWidth(720), SetHeight(1280), SetFramerate(30),
                                SetGravity(2), SetParticles(5000), SetSubsteps(4)>;
@@ -157,3 +160,4 @@ namespace PLSC
     static constexpr auto       r2 = decltype(s2)::Radius;
 
 } // namespace PLSC
+#endif

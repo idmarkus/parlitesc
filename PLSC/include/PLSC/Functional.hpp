@@ -83,31 +83,173 @@ namespace PLSC
         //        };
     } // namespace EnableIf
 
-      /*!
-       * <>A tuple intermediary interface for variadic types which can be wrapped into some monadic M, e.g.
-       * a Union-like structure: union {x; y;} or shared_ptr of a virtual baseclass, etc. Allows variad arrays
-       * of M x
-       * @tparam M Monad type which can wrap all argument parameters Cs, allows you to take any combination of
-       * nested tuples of types C in Cs and create an array of M c ... cs
-       */
-    template <class M>
+    /// ###########################################
+    /// # Tuple stuff                             #
+    /// ###########################################
+
+    /// @Cons X, [Xs] -> [X, Xs]
+    template <class, class>
+    struct Cons;
+
+    template <class C, class... Cs>
+    struct Cons<C, std::tuple<Cs...>>
+    {
+        using T = std::tuple<C, Cs...>;
+    };
+
+    /// @Pop [X, Xs...] -> X, [Xs]
+    template <class>
+    struct Pop;
+
+    template <class X, class... Xs>
+    struct Pop<std::tuple<X, Xs...>>
+    {
+        using Head = X;
+        using Tail = std::tuple<Xs...>;
+    };
+
+    /// @Elem Is X in [Xs...]
+    template <class X, class Ys>
+    struct Elem;
+
+    template <class X, class Y, class... Ys>
+    struct Elem<X, std::tuple<Y, Ys...>>
+    {
+        static constexpr bool value = std::is_same_v<X, Y> || Elem<X, std::tuple<Ys...>>::value;
+    };
+
+    template <class X, class Y>
+    struct Elem<X, std::tuple<Y>>
+    {
+        static constexpr bool value = std::is_same_v<X, Y>;
+    };
+
+    template <class X>
+    struct Elem<X, std::tuple<>>
+    {
+        static constexpr bool value = false;
+    };
+
+    template <class... Cs>
+    struct Unique;
+
+    template <>
+    struct Unique<>
+    {
+        using T = std::tuple<>;
+    };
+
+    template <class Y, class... Xs, class... Ys>
+    struct Unique<std::tuple<Xs...>, std::tuple<Y, Ys...>>
+    {
+        using T = std::conditional<Elem<Y, std::tuple<Xs...>>::value,
+                                   typename Unique<std::tuple<Xs...>, std::tuple<Ys...>>::T,
+                                   typename Unique<std::tuple<Y, Xs...>, std::tuple<Ys...>>::T>::type;
+    };
+
+    template <class... Xs>
+    struct Unique<std::tuple<Xs...>, std::tuple<>>
+    {
+        using T = std::tuple<Xs...>;
+    };
+
+    template <class... Cs>
+    struct Unique<const std::tuple<Cs...>>
+    {
+        using T = Unique<std::tuple<>, std::tuple<Cs...>>::T;
+    };
+    template <class... Cs>
+    struct Unique<std::tuple<Cs...>>
+    {
+        using T = Unique<std::tuple<>, std::tuple<Cs...>>::T;
+    };
+
+    template <class, class>
+    struct Count;
+
+    template <class X, class... Ys>
+    struct Count<X, const std::tuple<Ys...>>
+    {
+        static constexpr size_t value = Count<X, std::tuple<Ys...>>::value;
+    };
+
+    template <class X, class Y, class... Ys>
+    struct Count<X, std::tuple<Y, Ys...>>
+    {
+        static constexpr size_t value = (std::is_same_v<X, Y> ? 1 : 0) + Count<X, std::tuple<Ys...>>::value;
+    };
+
+    template <class X>
+    struct Count<X, std::tuple<>>
+    {
+        static constexpr size_t value = 0;
+    };
+
+    template <class X, auto y>
+    struct Zipr
+    {
+        using T                     = X;
+        static constexpr auto value = y;
+    };
+
+    template <class X, class Tup = std::tuple<>>
+    struct ZipCount
+    {
+        using T                       = X;
+        static constexpr size_t value = Count<X, Tup>::value;
+    };
+
+    template <class X, class Tup>
+    inline constexpr bool elem = Elem<X, Tup>::value;
+
+    template <class X, class Tuple>
+    static constexpr size_t count = Count<X, Tuple>::value;
+
+    template <class X, class Tuple>
+    struct ArrayBase
+    {
+        static constexpr size_t N = count<X, Tuple>;
+    };
+
+    template <class...>
+    struct Arrayplex;
+
+    template <class Tuple, class... Unique>
+    struct Arrayplex<Tuple, std::tuple<Unique...>> : ArrayBase<Unique, Tuple>...
+    {
+        template <class X>
+        inline static constexpr size_t N = ArrayBase<X, Tuple>::N;
+    };
+
+    template <class... Xs>
+    struct Arrayplex<const std::tuple<Xs...>>
+        : Arrayplex<std::tuple<Xs...>, typename Unique<std::tuple<Xs...>>::T>
+    {};
+
+    static constexpr void testunique()
+    {
+        constexpr auto tup = std::make_tuple(1, 2.0, 1.2f, false, false);
+        using unq          = Unique<decltype(tup)>::T;
+
+        constexpr size_t cint = Count<bool, decltype(tup)>::value;
+
+        static_assert(std::is_same_v<unq, std::tuple<int, double, float, bool>>);
+        constexpr unq t2;
+
+        using wrap          = Arrayplex<decltype(tup)>;
+        constexpr auto hasb = wrap::N<bool>;
+    }
+
+    /*!
+     * <>A tuple intermediary interface for variadic types which can be wrapped into some monadic M, e.g.
+     * a Union-like structure: union {x; y;} or shared_ptr of a virtual baseclass, etc. Allows variad arrays
+     * of M x
+     * @tparam M Monad type which can wrap all argument parameters Cs, allows you to take any combination of
+     * nested tuples of types C in Cs and create an array of M c ... cs
+     */
     class Tuplex
     {
     public:
-        /**
-         * <> Flatwrap any combination of singles, x y z, tuple-like of singles, [x], or nested tuple-likes,
-         * [x, [M y]], into an array of wrapped singles M x
-         * @tparam Xs Types that can be wrapped by monad M: forall x in Xs -> M x
-         * @param xs any of : x,[x,[x]]
-         * @return [M x]
-         */
-        template <class... Xs>
-        static constexpr auto Array(Xs... xs)
-        {
-            constexpr size_t N = (0 + ... + M_Count<Xs>::value);
-            return M_ArrayHelper(Flatten(xs...), std::make_index_sequence<N>());
-        }
-
         /*! Flatten any combination of tuple-like of singles or tuples of (tuples of) singles into a tuple of
          * singles.
          * @param args x,[y,[M z]] -> [M x, M y, M z]
@@ -116,6 +258,21 @@ namespace PLSC
         static constexpr auto Flatten(Cs... args)
         {
             return std::tuple_cat((M_Flatten(args))...);
+        }
+
+    public:
+        /**
+         * <> Flatwrap any combination of singles, x y z, tuple-like of singles, [x], or nested tuple-likes,
+         * [x, [M y]], into an array of wrapped singles M x
+         * @tparam Xs Types that can be wrapped by monad M: forall x in Xs -> M x
+         * @param xs any of : x,[x,[x]]
+         * @return [M x]
+         */
+        template <class M, class... Xs>
+        static constexpr auto Array(Xs... xs)
+        {
+            constexpr size_t N = (0 + ... + M_Count<Xs>::value);
+            return M_ArrayHelper<M>(Flatten(xs...), std::make_index_sequence<N>());
         }
 
         /// @Count Helper to find the flat tuple length before flattening
@@ -181,16 +338,22 @@ namespace PLSC
         };
 
     private:
-        template <class Tuple, size_t... Indices>
+        template <class M, class Tuple, size_t... Indices>
         static constexpr auto M_ArrayHelper(Tuple tuple, std::index_sequence<Indices...>)
         {
-            return std::array<M, sizeof...(Indices)> {(std::get<Indices>(tuple))...};
+            return std::array<M, sizeof...(Indices)> {(M(std::get<Indices>(tuple)))...};
         }
 
-        template <typename T, EnableIf::Convertible<T, M> = true>
+        template <typename T>
         static constexpr auto M_Flatten(T x)
         {
-            return std::make_tuple(M(x));
+            return std::make_tuple(x);
+        }
+
+        template <std::invocable F>
+        static constexpr auto M_Flatten(F f)
+        {
+            return M_Flatten(f());
         }
 
         // These don't work.
@@ -223,6 +386,87 @@ namespace PLSC
             return std::tuple_cat((M_Flatten(std::get<Indices>(tuple)))...);
         }
     };
+
+    template <typename Arg>
+    using Fun = void (*)(Arg);
+
+    template <typename Arg>
+    static constexpr void Nop(Arg _)
+    {}
+
+    template <typename T, Fun<T>... fs>
+    struct ComposeVoid
+    {
+        static constexpr void F(T x) { ((fs(x)), ...); }
+    };
+
+    //    namespace Impl
+    //    {
+    //        template <typename T, Fun<T>... Fs>
+    //        struct Composer
+    //        {
+    //        };
+    //
+    //        template <typename T, Fun<T> Fn, Fun<T>... Fs>
+    //        struct Composer<T, Fn, Fs...>
+    //        {
+    //            static constexpr T F(T x) { return Fn(Composer<T, Fs...>::F(x)); }
+    //        };
+    //
+    //        template <typename T, Fun<T> Fn>
+    //        struct Composer<T, Fn>
+    //        {
+    //            static constexpr T F(T x) { return Fn(x); }
+    //        };
+    //    } // namespace Impl
+    //
+    //    template <typename T, Fun<T>... Fs>
+    //    struct Composer
+    //    {
+    //        static constexpr auto F = Impl::Composer<T, Fs...>::F;
+    //
+    //        constexpr T operator()(T x) const { return F(x); }
+    //    };
+
+    //    template <typename T, Fun<T> Fn>
+    //    struct Functor
+    //    {
+    //        static constexpr Fun<T> F = Fn;
+    //
+    //        template <Fun<T> Fn2>
+    //        constexpr auto operator<<(Functor<T, Fn2> vf) const
+    //        {
+    //            return Functor<T, Impl::Composer<T, F, vf.F>::F>();
+    //        }
+    //
+    //        constexpr T operator<<(const T &p) const { return F(p); }
+    //
+    //        constexpr T operator()(T p) const { return F(p); }
+    //        constexpr operator Fun<T>() const { return F; }
+    //
+    //        //        constexpr Func<T, > operator<<(const Func<T, F> f) const { return F }
+    //    };
+
+    //    static constexpr int Pval(int p) { return p + 2; }
+    //    static void          test()
+    //    {
+    //        constexpr int v = 0;
+    //        constexpr int b = Pval(v);
+    //
+    //        constexpr Functor<int, Pval>     f;
+    //        constexpr Composer<int, Pval, f> comp;
+    //        constexpr int                    cv = comp(v);
+    //
+    //        constexpr int c = f << f << v;
+    //
+    //        constexpr auto cm  = f << f << f;
+    //        constexpr auto cmv = cm(v);
+    //
+    //        static constexpr std::array<const Fun<int>, 5> farr
+    //            = {f, (f << f), (f << f << f), (f << f << f << f), (f << f << f << f << f)};
+    //
+    //        constexpr auto fav = farr[4](v);
+    //    }
 
 } // namespace PLSC
 
